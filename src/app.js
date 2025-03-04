@@ -2,10 +2,22 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { greetings } from "./greetings.js";
+import path from "path";
+import fs from "fs";
 
 const app = express();
 
 app.use(cors());
+
+const flagsPath = new URL("../node_modules/svg-country-flags/svg", import.meta.url).pathname;
+// console.log(flagsPath);
+
+app.get("/flags/:countryCode", (req, res) => {
+  const { countryCode } = req.params;
+  const flagPath = path.join(flagsPath, `${countryCode.toLowerCase()}.svg`);
+  if (!fs.existsSync(flagPath)) return res.status(404).json({ message: "Flag not found." });
+  return res.sendFile(flagPath);
+});
 
 app.get("/greeting/random", (req, res) => {
   const { language } = req.query;
